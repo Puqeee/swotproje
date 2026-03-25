@@ -1,0 +1,13 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Streamlit secrets (Eğer ileride GSheets API vb. şifre eklerseniz GitHub'a gitmesini engeller)
+.streamlit/secrets.toml
+
+# Virtual environments
+venv/
+env/
+.env
+
