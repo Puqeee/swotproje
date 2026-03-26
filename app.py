@@ -110,3 +110,41 @@ else:
                 items = company_data[company_data["Kategori"] == "Tehdit (Threats)"]
                 for _, row in items.iterrows():
                     st.write(f"- {row['Yorum']} *({row['Ekleyen']})*")
+            
+            # --- AI Analizi Bölümü ---
+            st.divider()
+            st.markdown("### 🤖 Trinity AI Şirket Değerlendirmesi")
+            st.markdown("💡 *Ekibe ait tüm yorumları inceleterek ortak bir analiz çıkarılmasını sağlayabilirsiniz.*")
+            
+            if st.button(f"✨ {current_company} İçin Ortak Analiz Çıkar", key=f"ai_btn_{i}"):
+                if company_data.empty:
+                    st.warning("Analiz edilecek yorum bulunamadı.")
+                else:
+                    with st.spinner("Trinity AI yorumları derliyor, lütfen bekleyin..."):
+                        try:
+                            from openai import OpenAI
+                            # OpenRouter API Key (Kendi ayarlarından alır, yoksa yazılan anahtarı kullanır)
+                            api_key = st.secrets.get("OPENROUTER_API_KEY", "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")
+                            client = OpenAI(
+                                base_url="https://openrouter.ai/api/v1",
+                                api_key=api_key,
+                            )
+                            
+                            yorumlar_metni = ""
+                            for _, row in company_data.iterrows():
+                                yorumlar_metni += f"- [{row['Kategori']}] {row['Yorum']} ({row['Ekleyen']})\n"
+                                
+                            prompt = f"Şu ana kadar ekibimiz '{current_company}' isimli şirket hakkında aşağıdaki yorumları yaptı:\n\n{yorumlar_metni}\n\nLütfen bu yorumları okuyarak sadece 1-2 paragraflık ortak, özetleyici ve net bir değerlendirme yaz. Yorumların ortak kanısını aktar. Tamamen Türkçe yaz ve madde imi kullanmadan doğrudan düz yazı (paragraf) olarak ver."
+                            
+                            response = client.chat.completions.create(
+                                model="arcee-ai/trinity-large-preview:free",
+                                messages=[
+                                    {"role": "user", "content": prompt}
+                                ]
+                            )
+                            
+                            st.success("Analiz başarıyla tamamlandı!")
+                            st.write(response.choices[0].message.content)
+                            
+                        except Exception as e:
+                            st.error(f"Yapay zeka ile iletişim sağlanamadı: {e}")
