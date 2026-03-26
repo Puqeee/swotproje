@@ -123,8 +123,13 @@ else:
                     with st.spinner("Trinity AI yorumları derliyor, lütfen bekleyin..."):
                         try:
                             from openai import OpenAI
-                            # OpenRouter API Key (Kendi ayarlarından alır, yoksa yazılan anahtarı kullanır)
-                            api_key = st.secrets.get("OPENROUTER_API_KEY", "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")
+                            # OpenRouter API Key (Sadece Streamlit Secrets'tan alınır)
+                            api_key = st.secrets.get("OPENROUTER_API_KEY")
+                            
+                            if not api_key:
+                                st.error("Lütfen Streamlit ayarlarına girip (Secrets paneline) OPENROUTER_API_KEY değerini ekleyin.")
+                                st.stop()
+                                
                             client = OpenAI(
                                 base_url="https://openrouter.ai/api/v1",
                                 api_key=api_key,
